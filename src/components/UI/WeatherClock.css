@@ -1,0 +1,450 @@
+/* ============================================================
+   WeatherClock — Premium circular widget
+   No CSS triangle mountains. Pure gradient + particle aesthetic.
+   ============================================================ */
+
+/* ── Widget shell ── */
+.wc-widget {
+  position: absolute;
+  top: 20px; right: 20px;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+  user-select: none;
+  font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif;
+}
+
+/* ── Circle viewport ── */
+.wc-circle {
+  position: relative;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  overflow: hidden;
+  /* Premium ring */
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,0.18),
+    0 0 0 4px rgba(255,255,255,0.06),
+    0 12px 40px rgba(0,0,0,0.4),
+    0 4px 12px rgba(0,0,0,0.25);
+}
+
+/* ============================================================
+   Sky — deep fluid gradient, transitions over 1.5s
+   ============================================================ */
+.wc-sky {
+  position: absolute;
+  inset: 0;
+  transition: background 2s ease;
+}
+.wc-scene--dawn      .wc-sky { background: radial-gradient(ellipse at 25% 80%, #fbb6a0 0%, #f9a07a 30%, #f4c07a 55%, #d6a8cf 80%, #b09ec7 100%); }
+.wc-scene--morning   .wc-sky { background: radial-gradient(ellipse at 20% 60%, #74c8f5 0%, #4ab0ed 30%, #60c8f0 60%, #a8dff5 100%); }
+.wc-scene--noon      .wc-sky { background: radial-gradient(ellipse at 50% 0%, #1e88e5 0%, #29b6f6 40%, #4dd0e1 80%, #80deea 100%); }
+.wc-scene--afternoon .wc-sky { background: radial-gradient(ellipse at 70% 20%, #26a0e4 0%, #4db8e8 40%, #74cce8 70%, #a5dced 100%); }
+.wc-scene--sunset    .wc-sky { background: radial-gradient(ellipse at 50% 90%, #ff9a44 0%, #e85d26 25%, #bf3b7a 55%, #7b3fa0 80%, #2c1a5e 100%); }
+.wc-scene--evening   .wc-sky { background: radial-gradient(ellipse at 50% 0%, #0c1a4a 0%, #142050 40%, #1a2d60 70%, #233870 100%); }
+.wc-scene--night     .wc-sky { background: radial-gradient(ellipse at 50% 30%, #060b1f 0%, #0b1230 40%, #10193e 70%, #0d1428 100%); }
+
+/* Weather mods on sky */
+.wc-wx--cloudy .wc-sky,
+.wc-wx--fog    .wc-sky { filter: saturate(0.45) brightness(0.82); }
+.wc-wx--storm  .wc-sky { filter: saturate(0.25) brightness(0.55); }
+.wc-wx--heatwave .wc-sky { filter: saturate(1.5) brightness(1.1) contrast(1.05); }
+
+/* ============================================================
+   Ambient orbs — large blurred colour blobs for depth/drama
+   ============================================================ */
+.wc-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(30px);
+  pointer-events: none;
+  transition: background 2s, opacity 1.5s;
+}
+.wc-orb-a {
+  width: 130px; height: 130px;
+  top: -30px; left: -20px;
+  opacity: 0.45;
+}
+.wc-orb-b {
+  width: 100px; height: 100px;
+  bottom: -20px; right: -10px;
+  opacity: 0.35;
+}
+
+.wc-scene--dawn      .wc-orb-a { background: radial-gradient(#ffb347, transparent); }
+.wc-scene--dawn      .wc-orb-b { background: radial-gradient(#e07bc0, transparent); }
+.wc-scene--morning   .wc-orb-a { background: radial-gradient(#fff9c4, transparent); opacity: 0.55; }
+.wc-scene--morning   .wc-orb-b { background: radial-gradient(#80d8ff, transparent); }
+.wc-scene--noon      .wc-orb-a { background: radial-gradient(#ffff8d, transparent); opacity: 0.65; animation: orb-breathe 3s ease-in-out infinite; }
+.wc-scene--noon      .wc-orb-b { background: radial-gradient(#40c4ff, transparent); }
+.wc-scene--afternoon .wc-orb-a { background: radial-gradient(#ffe0b2, transparent); opacity: 0.5; }
+.wc-scene--sunset    .wc-orb-a { background: radial-gradient(#ff7043, transparent); opacity: 0.7; animation: orb-breathe 2.5s ease-in-out infinite; }
+.wc-scene--sunset    .wc-orb-b { background: radial-gradient(#ab47bc, transparent); opacity: 0.5; }
+.wc-scene--evening   .wc-orb-a { background: radial-gradient(#1565c0, transparent); opacity: 0.35; }
+.wc-scene--evening   .wc-orb-b { background: radial-gradient(#4a148c, transparent); opacity: 0.3; }
+.wc-scene--night     .wc-orb-a { background: radial-gradient(#0d47a1, transparent); opacity: 0.2; }
+.wc-scene--night     .wc-orb-b { background: radial-gradient(#311b92, transparent); opacity: 0.18; }
+
+@keyframes orb-breathe {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%       { opacity: 0.8; transform: scale(1.18); }
+}
+
+/* ============================================================
+   Celestial body — sun or moon (pure radial gradient)
+   ============================================================ */
+.wc-celestial {
+  position: absolute;
+  border-radius: 50%;
+  transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+/* Sun */
+.wc-sun {
+  width: 46px; height: 46px;
+  background: radial-gradient(circle at 38% 38%, #fffde7, #ffee58 45%, #fdd835 70%, #f9a825 100%);
+  box-shadow:
+    0 0 0 4px rgba(255,236,100,0.25),
+    0 0 18px 8px rgba(255,214,0,0.45),
+    0 0 40px 20px rgba(255,183,0,0.2);
+  animation: sun-pulse 4s ease-in-out infinite;
+}
+.wc-scene--dawn      .wc-sun { top: 60%; left: 14%; transform: translateY(-50%); }
+.wc-scene--morning   .wc-sun { top: 22%; left: 18%; }
+.wc-scene--noon      .wc-sun { top: 8%;  left: 50%; transform: translateX(-50%); }
+.wc-scene--afternoon .wc-sun { top: 20%; right: 18%; left: auto; }
+.wc-scene--sunset    .wc-sun { top: 58%; right: 16%; left: auto; transform: translateY(-50%); }
+
+@keyframes sun-pulse {
+  0%, 100% { box-shadow: 0 0 18px 8px rgba(255,214,0,0.4), 0 0 40px 20px rgba(255,183,0,0.18); }
+  50%       { box-shadow: 0 0 26px 14px rgba(255,214,0,0.6), 0 0 60px 30px rgba(255,183,0,0.3); }
+}
+
+/* Moon */
+.wc-moon {
+  width: 40px; height: 40px;
+  background: radial-gradient(circle at 45% 40%, #f5f5f5, #e0e0e0 50%, #bdbdbd 100%);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.15),
+    0 0 14px 5px rgba(200,220,255,0.35),
+    inset -4px -4px 8px rgba(0,0,0,0.12);
+  animation: moon-breathe 6s ease-in-out infinite;
+}
+.wc-scene--evening .wc-moon { top: 18%; right: 22%; left: auto; }
+.wc-scene--night   .wc-moon { top: 12%; right: 26%; left: auto; }
+
+@keyframes moon-breathe {
+  0%, 100% { box-shadow: 0 0 14px 5px rgba(200,220,255,0.3); }
+  50%       { box-shadow: 0 0 22px 10px rgba(200,220,255,0.55); }
+}
+
+/* Moon crescent shadow overlay */
+.wc-moon-crescent {
+  position: absolute;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 55% 45%, rgba(80,90,120,0.35), transparent 60%);
+  top: 4px; left: 6px;
+}
+
+/* ============================================================
+   Stars
+   ============================================================ */
+.wc-stars { position: absolute; inset: 0; pointer-events: none; }
+.wc-star {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 50%;
+  animation: star-twinkle var(--dur, 2.5s) ease-in-out infinite alternate;
+}
+@keyframes star-twinkle {
+  from { opacity: 0.15; transform: scale(0.7); }
+  to   { opacity: 1;    transform: scale(1.35); }
+}
+
+/* ── Shooting stars ── */
+.wc-shooting { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.wc-shoot {
+  position: absolute;
+  height: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.95), transparent);
+  animation: shoot linear infinite;
+}
+.wc-shoot-1 { width: 60px; top: 18%; left: -70px; animation-duration: 5s; animation-delay: 1.2s; }
+.wc-shoot-2 { width: 45px; top: 30%; left: -60px; animation-duration: 7s; animation-delay: 4s; }
+
+@keyframes shoot {
+  from { transform: translateX(0) rotate(-20deg); opacity: 0; }
+  5%   { opacity: 1; }
+  70%  { opacity: 0.6; }
+  to   { transform: translateX(320px) rotate(-20deg); opacity: 0; }
+}
+
+/* ============================================================
+   Cloud layers — pure blurred ellipses, no border tricks
+   ============================================================ */
+.wc-cloud-layer {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(18px);
+  pointer-events: none;
+  animation: cloud-drift linear infinite;
+}
+.wc-cloud-layer-1 {
+  width: 90px; height: 32px;
+  top: 22%; left: -95px;
+  background: rgba(255,255,255,0.65);
+  animation-duration: 20s;
+}
+.wc-cloud-layer-2 {
+  width: 70px; height: 24px;
+  top: 36%; left: -80px;
+  background: rgba(255,255,255,0.5);
+  animation-duration: 28s;
+  animation-delay: -10s;
+}
+.wc-cloud-layer-storm {
+  width: 160px; height: 50px;
+  top: 10%; left: -170px;
+  background: rgba(90,90,110,0.75);
+  filter: blur(24px);
+  animation-duration: 14s;
+  animation-delay: -3s;
+}
+@keyframes cloud-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(330px); }
+}
+
+/* ============================================================
+   Rain — sleek semi-transparent lines
+   ============================================================ */
+.wc-rain { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.wc-drop {
+  position: absolute;
+  top: -20px;
+  width: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, transparent 0%, rgba(180,220,255,0.85) 100%);
+  animation: rain-fall linear infinite;
+  transform: rotate(10deg);
+}
+@keyframes rain-fall {
+  from { transform: translateY(-20px) rotate(10deg); opacity: 0.9; }
+  to   { transform: translateY(240px) rotate(10deg); opacity: 0; }
+}
+
+/* ============================================================
+   Lightning
+   ============================================================ */
+.wc-lightning {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  animation: lightning 3.8s ease-in-out infinite;
+}
+@keyframes lightning {
+  0%,86%,100% { background: rgba(255,255,255,0); }
+  88%          { background: rgba(255,255,255,0.82); }
+  90%          { background: rgba(255,255,255,0.08); }
+  92%          { background: rgba(255,255,255,0.55); }
+}
+
+/* ============================================================
+   Fog
+   ============================================================ */
+.wc-fog {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(210,218,226,0.55), rgba(190,205,215,0.45));
+  animation: fog-shift 9s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes fog-shift {
+  from { transform: translateX(-12px); opacity: 0.5; }
+  to   { transform: translateX(12px);  opacity: 0.8; }
+}
+
+/* ============================================================
+   Heatwave
+   ============================================================ */
+.wc-heat {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,120,0,0.12) 0%, transparent 60%);
+  animation: heat-ripple 2.2s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes heat-ripple {
+  from { transform: scaleY(1) translateY(0); opacity: 0.6; }
+  to   { transform: scaleY(1.03) translateY(-3px); opacity: 1; }
+}
+
+/* ============================================================
+   Wind streaks
+   ============================================================ */
+.wc-wind { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.wc-streak {
+  position: absolute;
+  height: 1.5px;
+  right: -60px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  animation: streak-blow linear infinite;
+}
+@keyframes streak-blow {
+  from { transform: translateX(0); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 0.6; }
+  to   { transform: translateX(-280px); opacity: 0; }
+}
+
+/* ============================================================
+   Snow
+   ============================================================ */
+.wc-snow { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.wc-snowflake {
+  position: absolute;
+  top: -6px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50%;
+  animation: snow-fall linear infinite;
+}
+@keyframes snow-fall {
+  from { transform: translateY(-6px) translateX(0) rotate(0); opacity: 0.9; }
+  to   { transform: translateY(230px) translateX(20px) rotate(360deg); opacity: 0; }
+}
+
+/* ============================================================
+   Flood
+   ============================================================ */
+.wc-flood {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 45px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(30,80,160,0.5), rgba(20,60,140,0.7));
+}
+.wc-wave {
+  position: absolute;
+  width: 280%; height: 30px;
+  top: -10px; left: -90%;
+  border-radius: 50%;
+  background: rgba(80,150,255,0.35);
+  animation: wave-roll 3.5s ease-in-out infinite;
+}
+.wc-wave-2 {
+  animation-delay: -1.5s;
+  opacity: 0.6;
+}
+@keyframes wave-roll {
+  0%, 100% { transform: translateX(0) scaleY(1); }
+  50%       { transform: translateX(6%) scaleY(1.25); }
+}
+
+/* ============================================================
+   Bottom vignette (gradient fade for depth)
+   ============================================================ */
+.wc-vignette {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.35));
+  pointer-events: none;
+}
+
+/* ============================================================
+   Clock typography
+   ============================================================ */
+.wc-clock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.wc-hm-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.wc-hm {
+  font-size: 42px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 1.5px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-shadow:
+    0 2px 12px rgba(0,0,0,0.7),
+    0 0 24px rgba(0,0,0,0.4);
+}
+.wc-sec {
+  font-size: 18px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.75);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+}
+.wc-date {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.82);
+  margin-top: 5px;
+  letter-spacing: 0.4px;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.65);
+}
+.wc-wx-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 2px;
+  margin-top: 4px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 5px rgba(0,0,0,0.65);
+}
+
+/* ============================================================
+   Controls
+   ============================================================ */
+.wc-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.wc-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: box-shadow 0.25s, transform 0.2s;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+}
+.wc-toggle--day  { background: #ffffff; color: #3c4043; }
+.wc-toggle--night { background: #1e1e3a; color: #cdd6f4; }
+.wc-toggle:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
+.wc-tgl-lbl { font-size: 11px; font-weight: 600; }
+
+.wc-demo-btn {
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: none;
+  background: rgba(255,255,255,0.9);
+  color: #3c4043;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.14);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.wc-demo-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.22); }

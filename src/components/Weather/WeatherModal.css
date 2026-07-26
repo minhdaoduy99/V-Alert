@@ -1,0 +1,73 @@
+.weather-modal {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 360px;
+  z-index: 1002;
+  background: #1e293b; /* Dark theme for weather like google */
+  color: #f8fafc;
+  padding: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+}
+
+.weather-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.weather-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.weather-subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.weather-header .btn-icon {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+}
+
+.weather-header .btn-icon:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.current-weather {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.current-temp {
+  font-size: 42px;
+  font-weight: 300;
+}
+
+.current-desc {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 14px;
+  color: #cbd5e1;
+}
+
+.chart-container {
+  margin-top: -10px;
+}
+
+.weather-loading {
+  padding: 40px 0;
+  text-align: center;
+  color: #94a3b8;
+}
