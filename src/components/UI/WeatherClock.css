@@ -167,27 +167,10 @@
   to   { opacity: 1;    transform: scale(1.35); }
 }
 
-/* ── Shooting stars ── */
-.wc-shooting { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.wc-shoot {
-  position: absolute;
-  height: 1.5px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.95), transparent);
-  animation: shoot linear infinite;
-}
-.wc-shoot-1 { width: 60px; top: 18%; left: -70px; animation-duration: 5s; animation-delay: 1.2s; }
-.wc-shoot-2 { width: 45px; top: 30%; left: -60px; animation-duration: 7s; animation-delay: 4s; }
-
-@keyframes shoot {
-  from { transform: translateX(0) rotate(-20deg); opacity: 0; }
-  5%   { opacity: 1; }
-  70%  { opacity: 0.6; }
-  to   { transform: translateX(320px) rotate(-20deg); opacity: 0; }
-}
+/* ── Shooting stars REMOVED (they appeared as diagonal sticks) ── */
 
 /* ============================================================
-   Cloud layers — pure blurred ellipses, no border tricks
+   Cloud layers — subtle wisps (non-cloudy weather)
    ============================================================ */
 .wc-cloud-layer {
   position: absolute;
@@ -199,28 +182,96 @@
 .wc-cloud-layer-1 {
   width: 90px; height: 32px;
   top: 22%; left: -95px;
-  background: rgba(255,255,255,0.65);
-  animation-duration: 20s;
+  background: rgba(255,255,255,0.45);
+  animation-duration: 22s;
 }
 .wc-cloud-layer-2 {
   width: 70px; height: 24px;
   top: 36%; left: -80px;
-  background: rgba(255,255,255,0.5);
-  animation-duration: 28s;
-  animation-delay: -10s;
-}
-.wc-cloud-layer-storm {
-  width: 160px; height: 50px;
-  top: 10%; left: -170px;
-  background: rgba(90,90,110,0.75);
-  filter: blur(24px);
-  animation-duration: 14s;
-  animation-delay: -3s;
+  background: rgba(255,255,255,0.35);
+  animation-duration: 30s;
+  animation-delay: -12s;
 }
 @keyframes cloud-drift {
   from { transform: translateX(0); }
   to   { transform: translateX(330px); }
 }
+
+/* ============================================================
+   Fluffy volumetric clouds (Có Mây / Rain / Storm)
+   Each cloud = 3 overlapping rounded puffs + a flat base.
+   box-shadow stacks give them depth and soft edges.
+   ============================================================ */
+.wc-fluffy-clouds {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ── Cloud container — drifts left→right ── */
+.wc-cloud {
+  position: absolute;
+}
+.wc-cloud-a { top: 14%; left: -160px; animation: fluffy-drift 18s linear infinite; }
+.wc-cloud-b { top: 32%; left: -130px; animation: fluffy-drift 26s linear infinite; animation-delay: -8s; }
+.wc-cloud-c { top: 22%; left: -90px;  animation: fluffy-drift 14s linear infinite; animation-delay: -4s; }
+
+@keyframes fluffy-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(370px); }
+}
+
+/* ── Cloud body wrapper ── */
+.wc-cloud-body {
+  position: relative;
+  width: 88px;
+  height: 40px;
+}
+.wc-cloud-b .wc-cloud-body { width: 68px; height: 32px; }
+.wc-cloud-c .wc-cloud-body { width: 52px; height: 26px; }
+
+/* ── Flat base (bottom rectangle) ── */
+.wc-cloud-base {
+  position: absolute;
+  bottom: 0; left: 8px; right: 8px;
+  height: 50%;
+  border-radius: 8px 8px 10px 10px;
+  background: rgba(255,255,255,0.82);
+  box-shadow:
+    0 2px 10px rgba(0,0,0,0.06),
+    0 4px 16px rgba(0,0,0,0.04);
+}
+.wc-fluffy-dark .wc-cloud-base {
+  background: rgba(160,165,185,0.8);
+}
+
+/* ── Puff spheres ── */
+.wc-puff {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  box-shadow:
+    inset -3px -4px 8px rgba(180,190,210,0.35),
+    0 2px 8px rgba(0,0,0,0.08);
+}
+.wc-fluffy-dark .wc-puff {
+  background: rgba(148,155,175,0.85);
+  box-shadow: inset -3px -4px 8px rgba(80,80,100,0.3), 0 2px 8px rgba(0,0,0,0.12);
+}
+
+/* Cloud A puffs (large) */
+.wc-cloud-a .wc-puff-1 { width: 42px; height: 42px; bottom: 10px; left: 10px; }
+.wc-cloud-a .wc-puff-2 { width: 36px; height: 36px; bottom: 14px; left: 34px; }
+.wc-cloud-a .wc-puff-3 { width: 28px; height: 28px; bottom: 10px; left: 58px; }
+
+/* Cloud B puffs (medium) */
+.wc-cloud-b .wc-puff-1 { width: 34px; height: 34px; bottom: 8px;  left: 6px; }
+.wc-cloud-b .wc-puff-2 { width: 28px; height: 28px; bottom: 10px; left: 28px; }
+
+/* Cloud C puffs (small) */
+.wc-cloud-c .wc-puff-1 { width: 26px; height: 26px; bottom: 6px;  left: 4px; }
+.wc-cloud-c .wc-puff-2 { width: 22px; height: 22px; bottom: 8px;  left: 22px; }
 
 /* ============================================================
    Rain — sleek semi-transparent lines
@@ -256,17 +307,85 @@
 }
 
 /* ============================================================
-   Fog
+   Fog / Mist (Sương Mù) — multi-layer drifting mist
+   SVG feTurbulence warps the mist bands for organic look.
    ============================================================ */
-.wc-fog {
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(210,218,226,0.55), rgba(190,205,215,0.45));
-  animation: fog-shift 9s ease-in-out infinite alternate;
+.wc-fog-layer {
+  position: absolute;
+  inset: 0;
   pointer-events: none;
+  overflow: hidden;
 }
-@keyframes fog-shift {
-  from { transform: translateX(-12px); opacity: 0.5; }
-  to   { transform: translateX(12px);  opacity: 0.8; }
+
+/* ── Mist bands — wide, semi-transparent white strips ── */
+.wc-mist {
+  position: absolute;
+  left: -30%;
+  width: 160%;
+  border-radius: 50%;
+  /* SVG turbulence filter applied via filter attribute in TSX */
+  filter: url(#fog-turbulence) blur(6px);
+}
+.wc-mist-1 {
+  height: 55px;
+  top: 20%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(230,235,240,0.72), rgba(210,220,228,0.35) 60%, transparent 100%);
+  animation: mist-drift-1 12s ease-in-out infinite alternate;
+}
+.wc-mist-2 {
+  height: 45px;
+  top: 42%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(220,228,235,0.65), rgba(200,215,225,0.28) 60%, transparent 100%);
+  animation: mist-drift-2 18s ease-in-out infinite alternate;
+  animation-delay: -5s;
+}
+.wc-mist-3 {
+  height: 60px;
+  top: 62%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(210,220,230,0.55), rgba(190,205,218,0.22) 60%, transparent 100%);
+  animation: mist-drift-1 9s ease-in-out infinite alternate;
+  animation-delay: -3s;
+}
+
+@keyframes mist-drift-1 {
+  from { transform: translateX(-18px) scaleX(1);   opacity: 0.55; }
+  to   { transform: translateX(18px)  scaleX(1.05); opacity: 0.9; }
+}
+@keyframes mist-drift-2 {
+  from { transform: translateX(14px)  scaleX(1.03); opacity: 0.4; }
+  to   { transform: translateX(-14px) scaleX(0.97); opacity: 0.75; }
+}
+
+/* ── Radial blob puffs drifting across ── */
+.wc-mist-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(22px);
+  animation: blob-float linear infinite;
+}
+.wc-mist-blob-1 {
+  width: 120px; height: 60px;
+  top: 28%; left: -130px;
+  background: radial-gradient(ellipse, rgba(240,244,248,0.75), transparent 70%);
+  animation-duration: 15s;
+}
+.wc-mist-blob-2 {
+  width: 100px; height: 50px;
+  top: 50%; left: -110px;
+  background: radial-gradient(ellipse, rgba(228,234,240,0.6), transparent 70%);
+  animation-duration: 21s;
+  animation-delay: -7s;
+}
+.wc-mist-blob-3 {
+  width: 140px; height: 55px;
+  top: 68%; left: -150px;
+  background: radial-gradient(ellipse, rgba(218,228,236,0.55), transparent 70%);
+  animation-duration: 13s;
+  animation-delay: -3s;
+}
+@keyframes blob-float {
+  from { transform: translateX(0); }
+  to   { transform: translateX(350px); }
 }
 
 /* ============================================================
@@ -319,30 +438,144 @@
 }
 
 /* ============================================================
-   Flood
+   Flood (Ngập Lụt) — organic wave blobs + floating debris
    ============================================================ */
 .wc-flood {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 45px;
+  height: 56px;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(30,80,160,0.5), rgba(20,60,140,0.7));
+  /* Deep murky water base */
+  background: linear-gradient(180deg,
+    rgba(25,70,140,0.0) 0%,
+    rgba(25,70,140,0.55) 30%,
+    rgba(15,50,110,0.85) 100%);
 }
-.wc-wave {
+
+/* ── Sky reflection shimmer at water surface ── */
+.wc-flood-sky {
   position: absolute;
-  width: 280%; height: 30px;
-  top: -10px; left: -90%;
-  border-radius: 50%;
-  background: rgba(80,150,255,0.35);
-  animation: wave-roll 3.5s ease-in-out infinite;
+  top: 0; left: 0; right: 0;
+  height: 14px;
+  background: linear-gradient(180deg, rgba(100,160,240,0.28), transparent);
+  animation: shimmer-move 4s ease-in-out infinite alternate;
 }
-.wc-wave-2 {
-  animation-delay: -1.5s;
-  opacity: 0.6;
+@keyframes shimmer-move {
+  from { opacity: 0.5; transform: scaleX(1); }
+  to   { opacity: 0.9; transform: scaleX(1.04); }
 }
-@keyframes wave-roll {
-  0%, 100% { transform: translateX(0) scaleY(1); }
-  50%       { transform: translateX(6%) scaleY(1.25); }
+
+/* ── Organic wave blobs (complex border-radius for liquid feel) ── */
+.wc-flood-wave {
+  position: absolute;
+  width: 130%;
+  left: -15%;
+  background: rgba(60,130,220,0.38);
+  pointer-events: none;
+}
+.wc-fw-1 {
+  height: 28px;
+  top: -8px;
+  border-radius: 40% 60% 55% 45% / 55% 45% 60% 40%;
+  animation: wave-morph-1 3.2s ease-in-out infinite;
+}
+.wc-fw-2 {
+  height: 24px;
+  top: 4px;
+  background: rgba(50,115,200,0.3);
+  border-radius: 55% 45% 40% 60% / 40% 60% 45% 55%;
+  animation: wave-morph-2 4.1s ease-in-out infinite;
+  animation-delay: -1.4s;
+}
+.wc-fw-3 {
+  height: 20px;
+  top: 14px;
+  background: rgba(40,100,185,0.25);
+  border-radius: 45% 55% 60% 40% / 60% 40% 55% 45%;
+  animation: wave-morph-1 5s ease-in-out infinite;
+  animation-delay: -2.6s;
+}
+
+@keyframes wave-morph-1 {
+  0%   { border-radius: 40% 60% 55% 45% / 55% 45% 60% 40%; transform: translateX(0)   scaleY(1); }
+  33%  { border-radius: 55% 45% 40% 60% / 40% 60% 45% 55%; transform: translateX(3%)  scaleY(1.18); }
+  66%  { border-radius: 60% 40% 50% 50% / 50% 50% 40% 60%; transform: translateX(-3%) scaleY(0.92); }
+  100% { border-radius: 40% 60% 55% 45% / 55% 45% 60% 40%; transform: translateX(0)   scaleY(1); }
+}
+@keyframes wave-morph-2 {
+  0%   { border-radius: 55% 45% 40% 60% / 40% 60% 45% 55%; transform: translateX(0)    scaleY(1); }
+  40%  { border-radius: 40% 60% 60% 40% / 55% 45% 50% 50%; transform: translateX(-4%)  scaleY(1.22); }
+  80%  { border-radius: 60% 40% 45% 55% / 45% 55% 60% 40%; transform: translateX(4%)   scaleY(0.88); }
+  100% { border-radius: 55% 45% 40% 60% / 40% 60% 45% 55%; transform: translateX(0)    scaleY(1); }
+}
+
+/* ── Flood shimmer glint ── */
+.wc-flood-shimmer {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px, transparent 24px,
+    rgba(160,210,255,0.08) 24px, rgba(160,210,255,0.08) 26px
+  );
+  animation: shimmer-slide 6s linear infinite;
+}
+@keyframes shimmer-slide {
+  from { transform: translateX(0); }
+  to   { transform: translateX(26px); }
+}
+
+/* ── Floating debris (wood planks / branches) ── */
+.wc-debris {
+  position: absolute;
+  border-radius: 3px;
+  background: #4a3019;
+  box-shadow: inset 0 1px 2px rgba(255,200,100,0.12), 0 1px 3px rgba(0,0,0,0.35);
+}
+/* Debris 1 — wide plank, drifts left */
+.wc-debris-1 {
+  width: 28px; height: 6px;
+  top: 18px; left: -32px;
+  border-radius: 2px 4px 2px 4px;
+  transform: rotate(-3deg);
+  animation: debris-drift-1 9s linear infinite, debris-bob 3.2s ease-in-out infinite;
+}
+/* Debris 2 — short stick, drifts slightly faster */
+.wc-debris-2 {
+  width: 16px; height: 4px;
+  top: 28px; left: -20px;
+  border-radius: 2px;
+  transform: rotate(5deg);
+  background: #3a2510;
+  animation: debris-drift-2 12s linear infinite, debris-bob 4s ease-in-out infinite;
+  animation-delay: -4s, -1.5s;
+}
+/* Debris 3 — small chunk, drifts from right */
+.wc-debris-3 {
+  width: 12px; height: 8px;
+  top: 22px; right: -16px;
+  border-radius: 3px 2px 4px 2px;
+  transform: rotate(-8deg);
+  background: #5a3820;
+  animation: debris-drift-3 10s linear infinite, debris-bob 2.8s ease-in-out infinite;
+  animation-delay: -2s, -0.8s;
+}
+
+@keyframes debris-drift-1 {
+  from { transform: translateX(0)    rotate(-3deg); }
+  to   { transform: translateX(260px) rotate(-1deg); }
+}
+@keyframes debris-drift-2 {
+  from { transform: translateX(0)    rotate(5deg); }
+  to   { transform: translateX(240px) rotate(8deg); }
+}
+@keyframes debris-drift-3 {
+  from { transform: translateX(0)     rotate(-8deg); }
+  to   { transform: translateX(-240px) rotate(-4deg); }
+}
+@keyframes debris-bob {
+  0%, 100% { margin-top: 0px; }
+  50%       { margin-top: 4px; }
 }
 
 /* ============================================================

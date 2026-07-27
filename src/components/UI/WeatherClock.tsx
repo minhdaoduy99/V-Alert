@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './WeatherClock.css';
+import { useStore, DEMO_WEATHERS } from '../../store/useStore';
+import type { WeatherType } from '../../store/useStore';
 
 type TimeScene = 'dawn' | 'morning' | 'noon' | 'afternoon' | 'sunset' | 'evening' | 'night';
-type WeatherType = 'clear' | 'cloudy' | 'rain' | 'storm' | 'fog' | 'heatwave' | 'windy' | 'flood';
+
 
 function getTimeScene(h: number): TimeScene {
   if (h >= 5  && h < 7)    return 'dawn';
@@ -14,13 +16,13 @@ function getTimeScene(h: number): TimeScene {
   return 'night';
 }
 
-/* ── Stars ── */
-const Stars: React.FC<{ count?: number }> = ({ count = 32 }) => {
+/* ── Stars (dot-only, no shooting sticks) ── */
+const Stars: React.FC<{ count?: number }> = ({ count = 34 }) => {
   const items = useMemo(() => Array.from({ length: count }, (_, i) => ({
     id: i,
     top:   `${3 + Math.random() * 68}%`,
     left:  `${Math.random() * 100}%`,
-    size:  1 + Math.random() * 2.5,
+    size:  1 + Math.random() * 2.2,
     delay: `${(Math.random() * 4).toFixed(2)}s`,
     dur:   `${(1.8 + Math.random() * 2.5).toFixed(2)}s`,
   })), [count]);
@@ -37,14 +39,6 @@ const Stars: React.FC<{ count?: number }> = ({ count = 32 }) => {
   );
 };
 
-/* ── Shooting stars ── */
-const ShootingStars: React.FC = () => (
-  <div className="wc-shooting" aria-hidden>
-    <span className="wc-shoot wc-shoot-1" />
-    <span className="wc-shoot wc-shoot-2" />
-  </div>
-);
-
 /* ── Rain ── */
 const Rain: React.FC<{ heavy?: boolean }> = ({ heavy }) => {
   const drops = useMemo(() => Array.from({ length: heavy ? 40 : 22 }, (_, i) => ({
@@ -59,27 +53,106 @@ const Rain: React.FC<{ heavy?: boolean }> = ({ heavy }) => {
     <div className="wc-rain" aria-hidden>
       {drops.map(d => (
         <span key={d.id} className="wc-drop" style={{
-          left: d.left,
-          height: d.len,
-          opacity: d.opacity,
-          animationDelay: d.delay,
-          animationDuration: d.dur,
+          left: d.left, height: d.len, opacity: d.opacity,
+          animationDelay: d.delay, animationDuration: d.dur,
         }} />
       ))}
     </div>
   );
 };
 
-/* Snow component removed (unused) */
+/* ── Fluffy volumetric clouds (SVG + layered box-shadow) ── */
+const FluffyClouds: React.FC<{ dark?: boolean }> = ({ dark }) => (
+  <div className={`wc-fluffy-clouds ${dark ? 'wc-fluffy-dark' : ''}`} aria-hidden>
+    {/* Cloud A — large, slow */}
+    <div className="wc-cloud wc-cloud-a">
+      <div className="wc-cloud-body">
+        <div className="wc-puff wc-puff-1" />
+        <div className="wc-puff wc-puff-2" />
+        <div className="wc-puff wc-puff-3" />
+        <div className="wc-cloud-base" />
+      </div>
+    </div>
+    {/* Cloud B — medium, mid speed */}
+    <div className="wc-cloud wc-cloud-b">
+      <div className="wc-cloud-body">
+        <div className="wc-puff wc-puff-1" />
+        <div className="wc-puff wc-puff-2" />
+        <div className="wc-cloud-base" />
+      </div>
+    </div>
+    {/* Cloud C — small, fast */}
+    <div className="wc-cloud wc-cloud-c">
+      <div className="wc-cloud-body">
+        <div className="wc-puff wc-puff-1" />
+        <div className="wc-puff wc-puff-2" />
+        <div className="wc-cloud-base" />
+      </div>
+    </div>
+  </div>
+);
 
+/* ── Realistic drifting fog / mist ── */
+const Fog: React.FC = () => (
+  <div className="wc-fog-layer" aria-hidden>
+    {/* SVG turbulence filter defined inline */}
+    <svg width="0" height="0" style={{ position: 'absolute' }}>
+      <defs>
+        <filter id="fog-turbulence" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.012 0.008"
+            numOctaves="4"
+            seed="3"
+            result="noise"
+          />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="noise"
+            scale="18"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
+      </defs>
+    </svg>
+    {/* Three mist bands at different speeds and opacities */}
+    <div className="wc-mist wc-mist-1" />
+    <div className="wc-mist wc-mist-2" />
+    <div className="wc-mist wc-mist-3" />
+    {/* Radial blobs moving sideways */}
+    <div className="wc-mist-blob wc-mist-blob-1" />
+    <div className="wc-mist-blob wc-mist-blob-2" />
+    <div className="wc-mist-blob wc-mist-blob-3" />
+  </div>
+);
 
+/* ── Dynamic flood with organic waves + floating debris ── */
+const Flood: React.FC = () => (
+  <div className="wc-flood" aria-hidden>
+    {/* Sky reflection tint above water */}
+    <div className="wc-flood-sky" />
+    {/* Organic wave blobs */}
+    <div className="wc-flood-wave wc-fw-1" />
+    <div className="wc-flood-wave wc-fw-2" />
+    <div className="wc-flood-wave wc-fw-3" />
+    {/* Surface shimmer */}
+    <div className="wc-flood-shimmer" />
+    {/* Floating debris */}
+    <div className="wc-debris wc-debris-1" />
+    <div className="wc-debris wc-debris-2" />
+    <div className="wc-debris wc-debris-3" />
+  </div>
+);
+
+/* ── Wind streaks ── */
 const WindStreaks: React.FC = () => {
   const streaks = useMemo(() => Array.from({ length: 14 }, (_, i) => ({
     id: i,
-    top:   `${5 + Math.random() * 90}%`,
-    width: 20 + Math.random() * 50,
-    delay: `${(Math.random() * 1.5).toFixed(2)}s`,
-    dur:   `${(0.5 + Math.random() * 0.6).toFixed(2)}s`,
+    top:     `${5 + Math.random() * 90}%`,
+    width:   20 + Math.random() * 50,
+    delay:   `${(Math.random() * 1.5).toFixed(2)}s`,
+    dur:     `${(0.5 + Math.random() * 0.6).toFixed(2)}s`,
     opacity: 0.3 + Math.random() * 0.45,
   })), []);
   return (
@@ -94,20 +167,20 @@ const WindStreaks: React.FC = () => {
   );
 };
 
-const DEMO_WEATHERS: WeatherType[] = ['clear', 'cloudy', 'rain', 'storm', 'fog', 'heatwave', 'windy', 'flood'];
+
 
 const WEATHER_LABELS: Record<WeatherType, string> = {
-  clear:    'TRỜI QUANG', cloudy:   'CÓ MÂY',    rain:    'MƯA NHỎ',
-  storm:    'BÃO / SẤM', fog:      'SƯƠNG MÙ',   heatwave:'NẮNG NÓNG',
+  clear:    'TRỜI QUANG', cloudy:   'CÓ MÂY',
+  rain:     'MƯA NHỎ',   storm:    'BÃO / SẤM',
+  fog:      'SƯƠNG MÙ',  heatwave: 'NẮNG NÓNG',
   windy:    'GIÓ MẠNH',  flood:    'NGẬP LỤT',
 };
 
-/* ── Main widget ── */
 interface Props { isDarkMode: boolean; onToggleDark: (v: boolean) => void; }
 
 const WeatherClock: React.FC<Props> = ({ isDarkMode, onToggleDark }) => {
   const [now, setNow]           = useState(new Date());
-  const [weatherIdx, setWIdx]   = useState(0);
+  const { weatherIdx, setWeatherIdx } = useStore();
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
@@ -122,47 +195,51 @@ const WeatherClock: React.FC<Props> = ({ isDarkMode, onToggleDark }) => {
   const pad  = (n: number) => String(n).padStart(2, '0');
   const hm   = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const sec  = pad(now.getSeconds());
-  const date = now.toLocaleDateString('vi-VN', { weekday: 'short', day:'2-digit', month:'2-digit', year:'numeric' });
+  const date = now.toLocaleDateString('vi-VN', { weekday:'short', day:'2-digit', month:'2-digit', year:'numeric' });
+
+  const hasClouds = weather === 'cloudy' || weather === 'rain' || weather === 'storm';
 
   return (
     <div className="wc-widget">
       <div className={`wc-circle wc-scene--${scene} wc-wx--${weather}`}>
 
-        {/* ── Deep gradient sky (pure CSS, no shapes) ── */}
+        {/* Sky gradient */}
         <div className="wc-sky" />
 
-        {/* ── Ambient colour orbs (large blurred blobs for depth) ── */}
+        {/* Ambient orbs */}
         <div className="wc-orb wc-orb-a" />
         <div className="wc-orb wc-orb-b" />
 
-        {/* ── Celestial: sun radial or moon crescent ── */}
+        {/* Celestial */}
         <div className={`wc-celestial ${isNight ? 'wc-moon' : 'wc-sun'}`}>
           {isNight && <div className="wc-moon-crescent" />}
         </div>
 
-        {/* ── Stars / shooting stars ── */}
+        {/* Stars only — NO shooting sticks */}
         {(scene === 'night' || scene === 'dawn') && <Stars />}
-        {scene === 'night' && <ShootingStars />}
 
-        {/* ── Cloud layers (pure blur-blob, no border tricks) ── */}
-        <div className="wc-cloud-layer wc-cloud-layer-1" />
-        <div className="wc-cloud-layer wc-cloud-layer-2" />
-        {(weather === 'cloudy' || weather === 'storm' || weather === 'rain') && (
-          <div className="wc-cloud-layer wc-cloud-layer-storm" />
+        {/* Fluffy volumetric clouds */}
+        {hasClouds && <FluffyClouds dark={weather === 'storm'} />}
+        {/* Light wisps always present for non-overcast weather */}
+        {!hasClouds && (
+          <>
+            <div className="wc-cloud-layer wc-cloud-layer-1" />
+            <div className="wc-cloud-layer wc-cloud-layer-2" />
+          </>
         )}
 
-        {/* ── Weather overlays ── */}
-        {(weather === 'rain' || weather === 'flood')  && <Rain />}
+        {/* Weather overlays */}
+        {(weather === 'rain' || weather === 'flood') && <Rain />}
         {weather === 'storm'    && <><Rain heavy /><div className="wc-lightning" /></>}
-        {weather === 'fog'      && <div className="wc-fog" />}
+        {weather === 'fog'      && <Fog />}
         {weather === 'heatwave' && <div className="wc-heat" />}
         {weather === 'windy'    && <WindStreaks />}
-        {weather === 'flood'    && <div className="wc-flood"><div className="wc-wave" /><div className="wc-wave wc-wave-2" /></div>}
+        {weather === 'flood'    && <Flood />}
 
-        {/* ── Horizon vignette (bottom fade) ── */}
+        {/* Bottom vignette */}
         <div className="wc-vignette" />
 
-        {/* ── Clock text ── */}
+        {/* Clock */}
         <div className="wc-clock">
           <div className="wc-hm-wrap">
             <span className="wc-hm">{hm}</span>
@@ -173,7 +250,7 @@ const WeatherClock: React.FC<Props> = ({ isDarkMode, onToggleDark }) => {
         </div>
       </div>
 
-      {/* ── Controls ── */}
+      {/* Controls */}
       <div className="wc-controls">
         <button
           className={`wc-toggle ${isDarkMode ? 'wc-toggle--night' : 'wc-toggle--day'}`}
@@ -185,7 +262,7 @@ const WeatherClock: React.FC<Props> = ({ isDarkMode, onToggleDark }) => {
         </button>
         <button
           className="wc-demo-btn"
-          onClick={() => setWIdx(i => (i + 1) % DEMO_WEATHERS.length)}
+          onClick={() => setWeatherIdx(i => (i + 1) % DEMO_WEATHERS.length)}
           title="Demo thời tiết"
         >
           🌦 Demo

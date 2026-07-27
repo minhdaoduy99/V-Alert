@@ -1,5 +1,8 @@
 import { create } from 'zustand';
 
+export type WeatherType = 'clear' | 'cloudy' | 'rain' | 'storm' | 'fog' | 'heatwave' | 'windy' | 'flood';
+export const DEMO_WEATHERS: WeatherType[] = ['clear','cloudy','rain','storm','fog','heatwave','windy','flood'];
+
 export interface Alert {
   id: string;
   type: 'Ngập lụt' | 'Sạt lở' | 'Cháy rừng';
@@ -41,6 +44,9 @@ interface AppState {
 
   selectedRegion: { name: string; lat: number; lng: number } | null;
   setSelectedRegion: (region: { name: string; lat: number; lng: number } | null) => void;
+
+  weatherIdx: number;
+  setWeatherIdx: (idx: number | ((prev: number) => number)) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -81,4 +87,9 @@ export const useStore = create<AppState>((set) => ({
 
   selectedRegion: null,
   setSelectedRegion: (region) => set({ selectedRegion: region }),
+
+  weatherIdx: 0,
+  setWeatherIdx: (idx) => set((state) => ({
+    weatherIdx: typeof idx === 'function' ? idx(state.weatherIdx) : idx
+  })),
 }));
